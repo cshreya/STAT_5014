@@ -1,0 +1,222 @@
+---
+title: "Homework 3"
+output:
+  pdf_document: default
+  html_document: default
+authir: Shreya Chandrasekharan
+---
+
+
+```{r, echo=FALSE}
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+library(magrittr)
+library(vioplot)
+library(beeswarm)
+library(stargazer)
+library(data.table)
+library(lubridate)
+
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library(knitr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(magrittr))
+suppressMessages(library(vioplot))
+suppressMessages(library(beeswarm))
+suppressMessages(library(stargazer))
+suppressMessages(library(data.table))
+suppressMessages(library(lubridate))
+
+```
+
+##**Problem 4**
+
+###*_Programming Style Guides_*
+
+_My Takeaway:_ Every person has their own style of programming their codes. The key is consistency in that style. Ultimately, mainting a consistent style of programming helps facilitate reproducible research, if the style improves the way the code can be interpreted.
+
+I will try to add comments to my codes henceforth to improve my coding style. I will strive to be consistent with the way I define objects and functions.
+
+##**Problem 5**
+
+```{r, eval=FALSE} 
+#Cannot run this code chunk, way too many markers
+lint(filename = "C:/Users/Shreya/Desktop/STAT 5014/STAT_5014/HW2_Chandrasekharan_Shreya.Rmd")
+```
+
+_Some things I need to change in my code_
+1. Spacing seems to be one of the most prominent markers.  I will need to start adding spaces after commas and around infix operators.
+2. I will need to use only double-quotes as much as possible.
+3.I will try not to cross 80 characters per line.
+
+##**Problem 6**
+
+```{r}
+#Read the given data
+
+data_rds <- 
+    readRDS("C:/Users/Shreya/Desktop/STAT 5014/STAT_5014/03_good_programming_R_functions/HW3_data.rds")
+mean.d1 <- data.frame()
+mean.d2 <- data.frame()
+sd.d1 <- data.frame()
+sd.d2 <- data.frame()
+cor.d12 <- data.frame()
+
+#Set loop for mean, stamdard deviation, and correlation
+
+for(i in 1:13){
+    mean_dev1 <- mean(filter(data_rds, Observer == i)[, "dev1"])
+    mean_dev2 <- mean(filter(data_rds, Observer == i)[, "dev2"])
+    sd_dev1 <- sd(filter(data_rds, Observer == i)[, "dev1"])
+    sd_dev2 <- sd(filter(data_rds, Observer == i)[, "dev2"])
+    cor_dev1_dev2 <- cor(filter(data_rds, Observer == i)[, "dev1"], 
+                         filter(data_rds, Observer == i)[, "dev2"])
+
+    #Make one data table from many
+    
+    mean.d1 <- rbind(mean.d1, mean_dev1)
+    mean.d2 <- rbind(mean.d2, mean_dev2)
+    sd.d1 <- rbind(sd.d1, sd_dev1)
+    sd.d2 <- rbind(sd.d2, sd_dev2)
+    cor.d12 <- rbind(cor.d12, cor_dev1_dev2)
+}
+
+#Table
+
+table_rds <- cbind(1:13, mean.d1, mean.d2, sd.d1, sd.d2, cor.d12)
+colnames(table_rds) <- c("Observer", "Mean Dev1", "Mean Dev2", "SD Dev1",
+                         "SD Dev2", "Correlation Dev1 Dev2" )
+knitr::kable(table_rds, caption = "Observed Data")
+
+#Boxplot
+
+boxplot(mean.d1, mean.d2, xlab = "Mean Dev1", ylab = "Mean Dev2", main =  "Mean Boxplot")
+
+#Violinplot
+
+sd_plot_violin <- ggplot(table_rds, aes(x = sd.d1, y = sd.d2))
+sd_plot_violin + geom_violin()
+
+```
+
+##**Problem 7**
+
+```{r}
+#Get link
+
+BP_link <- "http://www2.isye.gatech.edu/~jeffwu/wuhamadabook/data/BloodPressure.dat"
+
+#CHeck what's needed in data 
+
+BP_raw <- read.table(BP_link, header = FALSE, skip = 2, fill = TRUE, 
+                     stringsAsFactors = FALSE)
+
+BP_tidy <- BP_raw[, -5]
+
+#Column 5 is unneeded
+
+#Change column names for clarity
+
+colnames(BP_tidy) <- c("Day", "Device 1", "Device 2", "Device 3", "Doctor 1", 
+                       "Doctor 2", "Doctor 3")
+
+#Better presentation
+
+knitr::kable(BP_tidy, caption = "Blood Pressure Measurement")
+
+
+```
+
+##**Problem 8**
+
+
+\begin{equation} f(x) = 3^x - sin(x) + cos(5x) \end{equation}
+
+```{r}
+
+#Define function
+
+newt_func <- function(fn, tol = 1E-18, x0 = 1, n = 20){
+    h <- 0.001
+    i <- 1
+    x1 <- x0
+    k <- n
+    
+#Try to reproduce what I saw online, pray it works
+
+    while(i<=n){
+        dx_func <- (fn(x0+h) - fn(x0))/h
+    x1 <- (x0 - (fn(x0)/dx_func))
+    k[i] < x1
+    i <- i + 1
+    if (abs(x1-x0) < tol) break
+    x0 <- x1
+    }
+    return(k[1:(i + 1)])
+}
+
+fn <- function(x){3^x - sin(x) + cos(5*x)}
+a <- newt_func(fn, x0 = 0, n = 5)
+a
+
+#It doesn't work :(
+
+#The code looks like what it's "supposed" to look like (courtesy: A LOT of Google-ing).
+#But I am not sure of what output I am getting.
+```
+
+    
+##**Problem 9**
+
+```{r, eval= FALSE}
+
+#Oh no! Not this again!
+
+
+    Car_Gebreken_raw <- read.csv("Open_Data_RDW__Gebreken.csv",stringsAsFactors = F, 
+                                 nrows=200, header=T,quote = '"')
+    Car_Geconstat_raw <- read.csv("Open_Data_RDW__Geconstateerde_Gebreken.csv", 
+                                  stringsAsFactors = F, nrows=200, header=T)
+    Car_Person_raw <- read.csv("Personenauto_basisdata.csv",stringsAsFactors = F,
+                               nrows=200, header=T)
+    
+    Car_Gebreken_raw.colclass <- sapply(Car_Gebreken_raw,class)
+    Car_Geconstat_raw.colclass <- sapply(Car_Geconstat_raw,class)
+    Car_Person_raw.colclass <- sapply(Car_Person_raw,class)
+    
+    print("Gebreken")
+    print(Car_Gebreken_raw.colclass)
+    print("Geconstat")
+    print(Car_Geconstat_raw.colclass)
+    print("Personen")
+    print(Car_Person_raw.colclass)
+    
+    #this had the defect code and description
+     Car_Gebreken_select <- fread(input = "Open_Data_RDW__Gebreken.csv", 
+                                  header = T, select=c(1,6), showProgress=F)
+    #this has the license plate, inspection date and defect code
+    Car_Geconstat_select <- fread(input = "Open_Data_RDW__Geconstateerde_Gebreken.csv", 
+                                  
+                                  header=T, select=c(1,3,5),showProgress=F)
+    #this has the license plate, make and model of vehicle
+    Car_Person_select <- fread(input = "Personenauto_basisdata.csv", 
+                               header=T, showProgress = F, select = c(1,3,4))
+    
+    Car_Geconstat_select_2017 <-
+      Car_Geconstat_select[grep("2017",
+Car_Geconstat_select$"Meld datum door keuringsinstantie")]
+   
+```    
+
+```{r, eval=FALSE}    
+    merge_License_plate <- merge(Car_Gebreken_select, Car_Geconstat_select,
+                                 Car_Person_select, by="Kenteken")
+    merge_Defect_code <- merge(Car_Gebreken_select,
+                               Car_Geconstat_select, Car_Person_select, 
+                               by="Gebrek identificatie")
+    ```
+
+_CONFESSION:_ I tried and tried, and got nowhere with this particular question. I have simply copied what I had submitted in my previous homework, which itself was incorrect/incomplete. My biggest challenge still remains merging huge datasets.
