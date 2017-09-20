@@ -1,9 +1,17 @@
 ---
 title: "Homework 3"
+author: "Shreya Chandrasekharan"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+---
+title: "Homework 3"
 output:
   pdf_document: default
   html_document: default
-authir: Shreya Chandrasekharan
+author: Shreya Chandrasekharan
 ---
 
 
@@ -189,7 +197,7 @@ a
     
     print("Gebreken")
     print(Car_Gebreken_raw.colclass)
-    print("Geconstat")
+ print("Geconstat")
     print(Car_Geconstat_raw.colclass)
     print("Personen")
     print(Car_Person_raw.colclass)
