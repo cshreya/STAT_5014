@@ -1,30 +1,149 @@
 ---
 title: "Homework 4"
 author: "Shreya Chandrasekharan"
-date: "September 27, 2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, echo=FALSE}
+
+library(knitr)
+library(xlsx)
+library(rJava)
+library(purrr)
+library(readxl)
+library(pastecs)
+library(boot)
+library(psych)
+library(GPArotation)
+library(ggplot2)
+library(scatterplot3d)
+library(DescTools)
+
+suppressMessages(library(knitr))
+suppressMessages(library(xlsx))
+suppressMessages(library(rJava))
+suppressMessages(library(purrr))
+suppressMessages(library(readxl))
+suppressMessages(library(pastecs))
+suppressMessages(library(boot))
+suppressMessages(library(psych))
+suppressMessages(library(GPArotation))
+suppressMessages(library(ggplot2))
+suppressMessages(library(scatterplot3d))
+suppressMessages(library(DescTools))
+
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+##**Problem 3**
 
-```{r cars}
-summary(cars)
+####***Focus of EDA stage of analysis***
+
+Exploratory Data Analysis (EDA) helps the researcher get a "quick and dirty" idea of the data. Roger Peng likens the concept of doing EDA to editing a movie. According to him, EDA helps the researcher guage the data and get a better idea of how to move forward with the data before starting any other form of analysis. This way, the researcher would know if it is wise to pursue the analysis at all if the data don't provide any worthwhile evience. EDA is not about the finer details of presentation, or even the final product. It marks the beginning of any type of statistical analysis that the researcher ultimately wants to do.
+
+
+##**Problem 4##
+```{r}
+
+#This step isn't needed, but just showing that we can read the file this way as well
+
+prob4_data1 <- read.xlsx("C:/Users/Shreya/Downloads/HW4_data.xlsx", sheetIndex = 1)
+prob4_data2 <- read.xlsx("C:/Users/Shreya/Downloads/HW4_data.xlsx", sheetIndex = 2)
+ 
+#Combining both sheets
+
+hw_data <- "C:/Users/Shreya/Downloads/HW4_data.xlsx"
+sheets_data <- excel_sheets(hw_data)
+hw_df <- map_df(sheets_data, ~ read_excel(hw_data, sheet = .x))
+
+#Getting Summary
+summary_hw_df <- summary(hw_df)
+summary_hw_df
+
+#Exploratory Analysis
+
+#First, we look at histograms of each factor type
+par(mfrow=c(1,3))
+hist(hw_df$block, breaks = 12, main = 'Histogram of "Blocks"', col = "blue")
+hist(hw_df$depth, breaks = 12, main = 'Histogram of "Depth"', col = "green")
+hist(hw_df$phosphate, breaks = 12, main = 'Histogram of "Phosphate"', col = "yellow")
+
+#Correlations
+
+cor(hw_df$depth, hw_df$phosphate, method = "pearson")
+cor(hw_df$block, hw_df$phosphate, method = "pearson")
+cor(hw_df$depth, hw_df$block, method = "pearson")
+
+#Some random analysis (Copied off the internet)
+
+hw_fact <- factanal(covmat = cor(hw_df, use = "complete.obs"), factors = 1, rotation = "varimax")
+corMatrix <- cor( hw_df, use="complete.obs" )
+hw_fact <- fa( r=corMatrix, factors=1 )
+print( hw_fact$loadings)
+print( hw_fact$residual)
+
+
+fa.diagram(hw_fact)
+#We can visualize the factors by calling the function fa.diagram(hw_fact). The square boxes are the observed variables, and the oval(s) (MR1) is the unobserved factor. The straight arrows are the loadings, the correlation between the factor and the observed variable(s). The curved arrows are the correlations between the factor(s). If no curved arrow is present, then the correlation between the factor(s) is not great.  source:http://connor-johnson.com/2014/03/30/exploratory-factor-analysis-in-r/
+
+#Correlation Plots
+
+pairs(~ block + phosphate + depth, data=hw_df)
+
+PlotCorr(corMatrix)
+
+
+#ANOVA ('cause why not?)
+
+fit <- aov(phosphate ~ depth + block, data=hw_df) 
+
+#Not the best use of ggplot2
+
+plot1 <- qplot(block, depth, data=hw_df)
+plot1
+plot2 <- qplot(block, phosphate, data=hw_df)
+plot2
+plot3 <- qplot(depth, phosphate, data=hw_df)
+plot3
+
+# Oooh! 3D!
+
+par(mfrow=c(1,1))
+with(data = hw_df,
+      scatterplot3d(x = block,
+                    y = depth,
+                    z = phosphate
+      )
+)
+
 ```
 
-## Including Plots
+###***Lesson***:
+When we know what the variables/factors are, our way of interpreting the data completely changes.
+For example, here, I focused on the (possible) cause and effect relationships between the three given variables, whereas, I didn't even consider checking for correlation in Problem 6 from HW3. Here, I found that there is no correlation between the three variables.
 
-You can also embed plots, for example:
+##**Problem 5**
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Single, most illuminating figure:
+
+```{r}
+
+par(mfrow=c(1,1))
+PlotCorr(corMatrix)
+
+#I know that the question says "single", still...
+
+with(data = hw_df,
+      scatterplot3d(x = block,
+                    y = depth,
+                    z = phosphate
+      )
+)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+###***My Learning***
+Exploratory Data Analysis completely changes perspectives with which I view data. 
+Also, knowing the names of variables/factors involved (when using secondary data) has a major impact on how we interpret the data.
