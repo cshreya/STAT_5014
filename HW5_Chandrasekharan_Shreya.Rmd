@@ -1,0 +1,222 @@
+---
+title: "Homework 5"
+author: "Shreya Chandrasekharan"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+
+library(tidyr)
+library(dplyr)
+library(downloader)
+library(data.table)
+library(readr)
+library(ggplot2)
+library(fiftystater)
+library(maps)
+library(mapdata)
+
+suppressMessages(library(tidyr))
+suppressMessages(library(dplyr))
+suppressMessages(library(downloader))
+suppressMessages(library(data.table))
+suppressMessages(library(readr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(fiftystater))
+suppressMessages(library(maps))
+suppressMessages(library(mapdata))
+```
+
+##**Problem 3**
+
+A good figure depends on whether or not it looks exactky the way it looks to others who see it, the way the researcher wanted them to visualize it. The objective for making the figure should be clear, its axes clearly labeled, while also being able to give the views an intuitive understanding of the data and convey the researcher's ideas. A ggood figure represents the underlying data in the "quickest and dirty" form.
+
+##**Problem 4**
+
+###**Part (a)**
+
+#Proportion of successes
+
+```{r, echo=FALSE}
+
+prop_success <- function(vect) {
+  
+sum(vect)/length(vect)
+}
+```
+
+###**Part (b)**
+
+#Simulation of 10 coin flips
+
+```{r}
+
+set.seed(23456)
+P4b_data <- matrix(rbinom(10, 1, prob = (30:40)/100), nrow = 10, ncol = 10)
+
+```
+
+###**Part (c)**
+
+#Proportion of success in P4b_data
+
+```{r, echo=FALSE}
+
+#First, by column
+prop_column <- apply(P4b_data, 2, FUN = prop_success)
+
+#Then by row
+prop_row <- apply(P4b_data, 1, FUN = prop_success)
+
+```
+
+####**_Comment_**: We observe the same proportion of success for coin flips across both columns and rows. This is because the data follows Binomial Distribution.
+
+###**Part (d)**
+
+#Matrix whose input is a probablility function that gives a vector whose elements are 10 flips of a coin as output 
+
+```{r, echo=FALSE}
+
+coin_func <- function(x) {
+  rbinom(10, 1, x)
+}
+
+P4d1 <- (30:40)/100
+P4d_data <- sapply(P4d1, coin_func)
+print(P4d_data)
+
+```
+
+##**Problem 5**
+
+
+```{r, echo=FALSE}
+
+#Load data
+
+data_url <-"http://www2.isye.gatech.edu/~jeffwu/book/data/starch.dat" 
+
+starch_data <- read.table(data_url, header = TRUE, fill = TRUE, stringsAsFactors = FALSE)
+
+#Exploratory analysis of data
+
+summary(starch_data)
+
+boxplot(thickness ~ starch, starch_data)
+boxplot(strength ~ starch, starch_data)
+
+#Correlations
+
+cor(starch_data$thickness, starch_data$strength, method = "pearson")
+
+#The respone variable is starch
+
+starch_data_CA <- filter(starch_data, starch == "CA")
+starch_data_CO <- filter(starch_data, starch == "CO")
+starch_data_PO <- filter(starch_data, starch == "PO")
+
+#Scatterplots by "starch"
+
+par(mfrow=c(1,3))
+plot(starch_data_CA$thickness, starch_data_CA$strength, main = "For CA")
+plot(starch_data_CO$thickness, starch_data_CO$strength, main = "For CO")
+plot(starch_data_PO$thickness, starch_data_PO$strength, main = "For PO")
+
+```
+
+##**Problem 6**
+
+###**Part (a)**
+
+#Get and import a database of US cities and states
+
+```{r, echo=FALSE}
+
+#we are grabbing a SQL set from here
+#url_cities <- "http://www.farinspace.com/wp-content/uploads/us_cities_and_states.zip""
+
+#download the files, looks like it is a .zip
+    
+download("http://www.farinspace.com/wp-content/uploads/us_cities_and_states.zip",
+
+dest = "us_cities_states.zip")
+
+unzip("us_cities_states.zip")
+    
+#read in data, looks like sql dump, blah
+    
+states <- fread(input = "./us_cities_and_states/states.sql",skip = 23,sep = "'", sep2 = ",", header = F, select = c(2,4))
+
+cities <- fread(input = "./us_cities_and_states/cities.sql",skip = 23,sep = "'", sep2 = ",", header = F, select = c(2,4))
+
+```
+
+###**Part (b)**
+
+```{r, echo=FALSE}
+
+#Create a summary table of the number of cities included by state
+
+city_num <- as.data.frame(table(unlist(cities$V4)))
+
+colnames(city_num) <- c("State", "Number of Cities")
+
+city_num
+
+```
+
+###**Part (c)**
+
+```{r, echo=FALSE, eval=FALSE}
+
+#Create a function that counts the number of occurances of a letter in a string
+
+letter_count <- data.frame(matrix(NA,nrow=50, ncol=26))
+    getCount <- function(letter, state){
+      
+      state_sub <- gsub(letter, "", state)
+      return(nchar(state) - nchar(state_sub))
+    }
+    
+        temp <- strsplit(state_name)
+        
+        return(count)
+
+    for(i in 1:50){
+        letter_count[i,] <- xx-apply()
+    }
+
+```
+
+#Sorry, I didn't finish this question owing to my regression test. :(
+
+###**Part (d)**
+
+#Map!!
+
+```{r, echo=FALSE, eval=FALSE}
+
+#https://cran.r-project.org/web/packages/fiftystater/vignettes/fiftystater.html
+    
+    
+data("fifty_states") # this line is optional due to lazy data loading
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+# map_id creates the aesthetic mapping to the state name column in your data
+p <- ggplot(crimes, aes(map_id = state)) + 
+# map points to the fifty_states shape data
+geom_map(aes(fill = Assault), map = fifty_states)  
+expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+      coord_map() +
+      scale_x_continuous(breaks = NULL) + 
+      scale_y_continuous(breaks = NULL) +
+      labs(x = "", y = "") +
+      theme(legend.position = "bottom", 
+            panel.background = element_blank())
+    
+p
+
+ggsave(plot = p, file = "HW5_Problem6_Plot_Chandrasekharan.pdf")
+```
