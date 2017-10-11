@@ -1,0 +1,116 @@
+##**Problem 2**
+
+```{r}
+set.seed(12345)
+y <- seq(from = 1, to = 100, lenght.out = 1e+08) + rnorm(1e+08)
+
+#Sum of squares using for() loop
+
+system.time(for(i in 1:length(y)){
+  sum((y[i] - mean(y))^2)
+})
+```
+
+```{r}
+
+#Sum of squares using vectors/matrices
+
+Y <- matrix(y, nrow = length(y), ncol = 1, byrow = TRUE)
+system.time(Y_t <- [t(Y-mean(Y)) %*% (Y-mean(Y))])
+```
+
+
+##**Problem 3**
+
+```{r}
+
+set.seed(1256)
+theta <- as.matrix(c(1, 2), nrow = 2) 
+X <- cbind(1, rep(1:10, 10))
+h <- X %*% theta + rnorm(100, 0, 0.2)
+
+
+theta1 <- matrix(0, nrow = 2)
+a <- 0.01
+t <- 0.1
+m <- length(h)
+
+#Required loop 
+
+for (i in 1:m) {
+while (abs(theta[1] - theta1[1]) > t && abs(theta[2] - theta1[2]) > t) {
+
+theta1[1] <- theta[1] - (a/m) * sum(theta1[1] + theta1[2] * X[i] - h[i])
+
+theta1[2] <- theta[2] - (a/m) * sum((theta[1] + theta[2] * X[i] - h[i]) * X[i])
+   
+}
+}
+
+#Loop result
+theta1
+
+#Fitting a linear model for h and x
+lin_mod <-lm(h ~ 0 + X)
+
+```
+
+Both the results from the loop and lin_mod are close to each other.
+
+##**Problem 4**
+
+$\hat\beta = (X'X)^{-1}X'\underline{y}$
+
+According to John Cook, I'd better not invert $(X'X)^{-1}$, no matter what. In this case, I honestly dont't know what to do, because I did not understand Cook's blog to begin with. Till now, I'm used to using matrix forms for solving proofs, and not for obtaining results on the values of $\hat\beta$. As for obtaining beta values, I just input data in a tabular form into some statistical software (preferably R), and use common regression codes to get answers. I don't know what I am to do here because I have never been in this situation, and also because Cook's blog didn't help much.
+
+##**Problem 5**
+
+$y = p + A B^{-1} (q - r)$
+
+```{r}
+
+set.seed(12456) 
+    
+    G <- matrix(sample(c(0,0.5,1),size=16000,replace=T),ncol=10)
+    R <- cor(G) # R: 10 * 10 correlation matrix of G
+    C <- kronecker(R, diag(1600)) # C is a 16000 * 16000 block diagonal matrix
+    id <- sample(1:16000,size=932,replace=F)
+    q <- sample(c(0,0.5,1),size=15068,replace=T) # vector of length 15068
+    A <- C[id, -id] # matrix of dimension 932 * 15068
+    B <- C[-id, -id] # matrix of dimension 15068 * 15068
+    p <- runif(932,0,1)
+    r <- runif(15068,0,1)
+    C<-NULL #save some memory space
+```
+
+###**Part (a)**
+  
+```{r}
+
+    #Sizes of A and B
+    size_A <- object.size(A)
+    size_B <- object.size(B)
+    
+    size_A
+    size_B
+    
+```
+
+###**Part (b)**
+
+So... I think I'll need to invert matrix B, which is a HUGE mistake according to Cook. I never got the solution for the equation.
+I'm guessing some concepts of Linear Algebra would come in handy to make it easier to solve the given equation, however I cannot think o fany at the moment.
+
+
+###**Part (c)**
+
+#Challenge not accepted
+
+```{r}
+
+compute <- y = p + A %*% solve(B) * (q - r)
+
+compute
+
+```
+
